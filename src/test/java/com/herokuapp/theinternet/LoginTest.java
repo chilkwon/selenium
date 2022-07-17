@@ -1,16 +1,17 @@
 package com.herokuapp.theinternet;
 
 import org.testng.Assert;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-public class PostiveTests {
+public class LoginTest {
 
-	@Test
-	public void loginTest() {
+	@Test(priority = 1, groups = { "positiveTests", "smokeTests" })
+	public void positiveLoginTest() {
 		// create driver
 		System.out.println("String Login Test");
 		System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
@@ -66,6 +67,43 @@ public class PostiveTests {
 				"Actual message does not the same as expected.\n ActualMsg:" + actualMsg + "\nExpected Message:");
 		// close browser
 		driver.quit();
+
+	}
+	@Parameters({"username","password","expectedMessage"})
+	@Test(priority = 2, groups = { "negativeTests", "smokeTests" })
+	public void negativeLoginTest(String username, String password, String expectedErrorMessage) {
+
+		System.out.println("Starting negative LoginTest with" + username+ " and " + password);
+		System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
+		WebDriver chromDriver = new ChromeDriver();
+		chromDriver.manage().window().maximize();
+
+		String url = "https://the-internet.herokuapp.com/login";
+		chromDriver.get(url);
+		System.out.println("Login Page is opened");
+
+		WebElement usernameElement = chromDriver.findElement(By.id("username"));
+		usernameElement.sendKeys(username);
+//		enter password
+		WebElement passwordElement = chromDriver.findElement(By.name("password"));
+		passwordElement.sendKeys(password);
+
+		WebElement loginButton = chromDriver.findElement(By.tagName("button"));
+		loginButton.click();
+
+		// Verification
+
+		WebElement errorMsg = chromDriver.findElement(By.id("flash"));
+		
+		String actualErrorMsg = errorMsg.getText();
+
+		Assert.assertTrue(actualErrorMsg.contains(expectedErrorMessage),
+				"Actual error message does not contain expected. \nActual: " + actualErrorMsg + "\nExpected:"
+						+ expectedErrorMessage);
+
+		// close browser
+
+		chromDriver.quit();
 
 	}
 
