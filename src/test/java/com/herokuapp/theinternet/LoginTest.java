@@ -1,6 +1,8 @@
 package com.herokuapp.theinternet;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.openqa.selenium.By;
@@ -10,15 +12,22 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 public class LoginTest {
 
-	@Test(priority = 1, groups = { "positiveTests", "smokeTests" })
-	public void positiveLoginTest() {
+	private WebDriver driver;
+
+	@BeforeMethod(alwaysRun = true)
+	private void setup() {
 		// create driver
 		System.out.println("String Login Test");
 		System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
-		WebDriver driver = new ChromeDriver();
+		driver = new ChromeDriver();
 		// maximize browser window
 
 		driver.manage().window().maximize();
+
+	}
+
+	@Test(priority = 1, groups = { "positiveTests", "smokeTests" })
+	public void positiveLoginTest() {
 
 //		open test page
 		String url = "https://the-internet.herokuapp.com/login";
@@ -42,7 +51,6 @@ public class LoginTest {
 		sleep(3000);
 		loginButton.click();
 
-		
 		sleep(5000);
 
 //		verifications
@@ -65,36 +73,30 @@ public class LoginTest {
 		// as expected");
 		Assert.assertTrue(actualMsg.contains(expectedMsg),
 				"Actual message does not the same as expected.\n ActualMsg:" + actualMsg + "\nExpected Message:");
-		// close browser
-		driver.quit();
 
 	}
-	@Parameters({"username","password","expectedMessage"})
+
+	@Parameters({ "username", "password", "expectedMessage" })
 	@Test(priority = 2, groups = { "negativeTests", "smokeTests" })
 	public void negativeLoginTest(String username, String password, String expectedErrorMessage) {
 
-		System.out.println("Starting negative LoginTest with" + username+ " and " + password);
-		System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
-		WebDriver chromDriver = new ChromeDriver();
-		chromDriver.manage().window().maximize();
-
 		String url = "https://the-internet.herokuapp.com/login";
-		chromDriver.get(url);
+		driver.get(url);
 		System.out.println("Login Page is opened");
 
-		WebElement usernameElement = chromDriver.findElement(By.id("username"));
+		WebElement usernameElement = driver.findElement(By.id("username"));
 		usernameElement.sendKeys(username);
 //		enter password
-		WebElement passwordElement = chromDriver.findElement(By.name("password"));
+		WebElement passwordElement = driver.findElement(By.name("password"));
 		passwordElement.sendKeys(password);
 
-		WebElement loginButton = chromDriver.findElement(By.tagName("button"));
+		WebElement loginButton = driver.findElement(By.tagName("button"));
 		loginButton.click();
 
 		// Verification
 
-		WebElement errorMsg = chromDriver.findElement(By.id("flash"));
-		
+		WebElement errorMsg = driver.findElement(By.id("flash"));
+
 		String actualErrorMsg = errorMsg.getText();
 
 		Assert.assertTrue(actualErrorMsg.contains(expectedErrorMessage),
@@ -103,8 +105,12 @@ public class LoginTest {
 
 		// close browser
 
-		chromDriver.quit();
+	}
 
+	@AfterMethod(alwaysRun=true)
+	private void tearDown() {
+		// close browser
+		driver.quit();
 	}
 
 	private void sleep(long m) {
